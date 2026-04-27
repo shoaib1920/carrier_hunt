@@ -42,16 +42,16 @@ const StudentProfileView: React.FC<StudentProfileViewProps> = ({ student, onUpda
 
   return (
     <div className="space-y-8 animate-fade-in pb-20">
-      <div className="bg-white p-10 rounded-[40px] shadow-sm border border-slate-100">
-        <div className="flex justify-between items-start mb-10">
-          <div className="flex gap-8 items-center">
-            <div className="w-32 h-32 rounded-[32px] border-4 border-indigo-50 bg-indigo-50 overflow-hidden shadow-2xl">
+      <div className="bg-white p-6 sm:p-10 rounded-[40px] shadow-sm border border-slate-100">
+        <div className="flex flex-col lg:flex-row justify-between items-start gap-8 mb-10">
+          <div className="flex flex-col sm:flex-row gap-6 items-start">
+            <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-[32px] border-4 border-indigo-50 bg-indigo-50 overflow-hidden shadow-2xl">
               <img src={`https://picsum.photos/seed/${student.id}/200`} alt="Avatar" className="w-full h-full object-cover" />
             </div>
             <div>
               <h2 className="text-4xl font-black text-slate-900 mb-2">{student.name}</h2>
               <p className="text-slate-500 font-bold text-lg">{student.university} • {student.department}</p>
-              <div className="flex gap-4 mt-4">
+              <div className="flex flex-col sm:flex-row gap-4 mt-4">
                 <span className="px-4 py-1.5 bg-indigo-600 text-white rounded-xl text-xs font-black uppercase tracking-widest shadow-lg shadow-indigo-100">
                   Readiness: {student.readinessScore}%
                 </span>
@@ -90,7 +90,7 @@ const StudentProfileView: React.FC<StudentProfileViewProps> = ({ student, onUpda
               )}
             </section>
 
-            <section className="grid grid-cols-2 gap-6">
+            <section className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div className="space-y-1">
                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Email</label>
                 {isEditing ? (
@@ -138,7 +138,7 @@ const StudentProfileView: React.FC<StudentProfileViewProps> = ({ student, onUpda
                 ))}
               </div>
 
-              <div className="flex gap-4">
+              <div className="flex flex-col sm:flex-row gap-4">
                 <input 
                   type="text" 
                   value={newSkill} 
@@ -148,7 +148,7 @@ const StudentProfileView: React.FC<StudentProfileViewProps> = ({ student, onUpda
                 />
                 <button 
                   onClick={handleAddSkill}
-                  className="px-8 bg-indigo-600 text-white font-black rounded-2xl active:scale-95 transition-all"
+                  className="px-8 py-4 bg-indigo-600 text-white font-black rounded-2xl active:scale-95 transition-all"
                 >
                   Add
                 </button>
@@ -158,7 +158,7 @@ const StudentProfileView: React.FC<StudentProfileViewProps> = ({ student, onUpda
               </p>
             </section>
 
-            <div className="p-8 bg-slate-900 rounded-[32px] text-white relative overflow-hidden">
+            <div className="p-6 sm:p-8 bg-slate-900 rounded-[32px] text-white relative overflow-hidden">
                <div className="absolute top-0 right-0 p-8 opacity-5">
                  <i className="fas fa-star text-8xl"></i>
                </div>

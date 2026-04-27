@@ -1,6 +1,6 @@
 
 import { GoogleGenAI, Type } from "@google/genai";
-import { AIAnalysisResult, StudentProfile, Project, Internship } from "../types";
+import { AIAnalysisResult, StudentProfile, Project, Internship, Skill } from "../types";
 
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
 
@@ -18,12 +18,12 @@ Rules:
 - Maintain a professional, non-threatening tone.`;
 
 export const analyzeStudentProfile = async (
-  skills: string[],
+  skills: Skill[],
   projects: Project[],
   targetRole: string = "Software Engineer"
 ): Promise<AIAnalysisResult> => {
   const prompt = `Student Evidence:
-  Skills: ${skills.join(', ')}
+  Skills: ${skills.map(s => s.name).join(', ')}
   Projects: ${JSON.stringify(projects.map(p => ({ title: p.title, description: p.description, status: p.verificationStatus })))}
   Target Role: ${targetRole}
   
@@ -176,7 +176,7 @@ export const generateCandidateSignal = async (student: StudentProfile, internshi
   const context = internship ? `against the role of ${internship.role} at ${internship.companyName}` : "regarding their general verified evidence";
   const prompt = `Generate a concise, factual summary for a recruiter regarding this candidate's verified evidence ${context}.
   Candidate: ${student.name}
-  Skills: ${student.skills.join(', ')}
+  Skills: ${student.skills.map(s => s.name).join(', ')}
   Projects: ${JSON.stringify(student.projects.filter(p => p.isVerified).map(p => ({ title: p.title, desc: p.description })))}
   
   Focus on translating technical work into industry signals. How do their specific projects prove they can handle the requirements? Do not use hype.`;
@@ -195,7 +195,7 @@ export const generateCandidateSignal = async (student: StudentProfile, internshi
 
 export const getRoleRecommendations = async (student: StudentProfile, internships: Internship[]): Promise<{id: string, score: number, reason: string}[]> => {
   const prompt = `Compare this student's profile with the following internships and identify the top 3 best matches.
-  Student: ${student.skills.join(', ')}
+  Student: ${student.skills.map(s => s.name).join(', ')}
   Projects: ${student.projects.map(p => p.title).join(', ')}
   
   Internships: ${JSON.stringify(internships.map(i => ({ id: i.id, role: i.role, reqs: i.requirements })))}

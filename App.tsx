@@ -238,13 +238,13 @@ const App: React.FC = () => {
       )}
 
       <Sidebar role={role} activeTab={activeTab} setActiveTab={setActiveTab} logout={() => { setRole(null); setActiveTab('dashboard'); }} />
-      <main className="flex-1 ml-64 p-8 overflow-y-auto">
-        <header className="flex justify-between items-center mb-8 sticky top-0 bg-slate-50/80 backdrop-blur-md py-4 z-20">
+      <main className="flex-1 md:ml-64 pt-28 md:pt-0 p-4 md:p-8 overflow-y-auto">
+        <header className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-8 sticky top-0 bg-slate-50/90 backdrop-blur-md py-4 z-20">
           <div>
             <h2 className="text-2xl font-black text-slate-800 capitalize tracking-tight">{activeTab.replace('-', ' ')}</h2>
             <p className="text-slate-500 font-medium">{role === UserRole.RECRUITER ? "Verified Talent Pipeline" : `Elite Candidate: ${currentUser.name}`}</p>
           </div>
-          <div className="flex items-center gap-6">
+          <div className="mt-4 sm:mt-0 flex items-center justify-between gap-6">
             <div className="text-right hidden sm:block">
               <p className="text-[10px] font-black text-indigo-600 uppercase tracking-widest">{role === UserRole.RECRUITER ? 'Talent Pool' : 'Verified Index'}</p>
               <p className="text-xl font-black text-slate-800">{role === UserRole.RECRUITER ? students.length : `${currentUser.readinessScore}%`}</p>

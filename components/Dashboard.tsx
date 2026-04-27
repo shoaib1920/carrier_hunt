@@ -11,7 +11,7 @@ interface DashboardProps {
   onNavigateToRole: (id: string) => void;
 }
 
-const Dashboard: React.FC<DashboardProps> = ({ student, students, internships, role, onNavigateToRole }) => {
+const Dashboard = ({ student, students, internships, role, onNavigateToRole }: DashboardProps) => {
   const [analysis, setAnalysis] = useState<AIAnalysisResult | null>(null);
   const [recommendations, setRecommendations] = useState<{id: string, score: number, reason: string}[]>([]);
   const [loading, setLoading] = useState(false);
