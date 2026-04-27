@@ -1,0 +1,8 @@
+{
+  "name": "Career Bridge",
+  "description": "An advanced merit-based internship ecosystem for Pakistan, bridging students from Baba Guru Nanak University with top-tier industries through AI-driven readiness scoring, tiered marketplaces, and verified project galleries.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
