@@ -12,7 +12,7 @@ interface ProjectGalleryProps {
   onVerifyProject?: (sId: string, pId: string, status: 'VERIFIED' | 'REJECTED') => void;
 }
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
+const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_API_KEY || '' });
 
 const ProjectGallery: React.FC<ProjectGalleryProps> = ({ projects, allStudents = [], role, onAddProject, onVerifyProject }) => {
   const [prepLoading, setPrepLoading] = useState<string | null>(null);
@@ -33,7 +33,7 @@ const ProjectGallery: React.FC<ProjectGalleryProps> = ({ projects, allStudents =
     setPrepLoading(project.id);
     try {
       const response = await ai.models.generateContent({
-        model: 'gemini-3-flash-preview',
+        model: 'gemini-2.5-flash',
         contents: `Generate 3 professional technical interview questions for a project titled "${project.title}" described as "${project.description}". Focus on architectural decisions and problem solving.`,
         config: {
           responseMimeType: "application/json",
@@ -54,7 +54,7 @@ const ProjectGallery: React.FC<ProjectGalleryProps> = ({ projects, allStudents =
   };
 
   const displayProjects = role === UserRole.RECRUITER 
-    ? allStudents.flatMap(s => s.projects.map(p => ({ ...p, studentName: s.name, studentId: s.id })))
+    ? allStudents.flatMap(s => s.projects.map(p => ({ ...p, studentName: s.name, studentId: s.uid })))
     : projects;
 
   return (
@@ -160,17 +160,13 @@ const ProjectGallery: React.FC<ProjectGalleryProps> = ({ projects, allStudents =
       )}
 
       {spotCheckProject && (
-        <div className="fixed inset-0 z-[70] flex items-center justify-center p-6">
-          <div className="absolute inset-0 bg-slate-900/90 backdrop-blur-xl" onClick={() => setSpotCheckProject(null)}></div>
-          <div className="relative w-full max-w-4xl h-[80vh] bg-white rounded-[48px] overflow-hidden shadow-2xl flex flex-col">
-            <div className="p-8 border-b border-slate-100 flex justify-between items-center">
-               <div>
-                  <h3 className="text-2xl font-black text-slate-900">Elite Spot-Check: {spotCheckProject.title}</h3>
-                  <p className="text-slate-500 text-sm font-medium">Gemini-powered voice verification to prove technical ownership.</p>
-               </div>
-               <button onClick={() => setSpotCheckProject(null)} className="text-4xl hover:text-rose-500 transition-colors">&times;</button>
-            </div>
-            <div className="flex-1 overflow-hidden">
+        <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 sm:p-6 bg-black/40 backdrop-blur-sm">
+          <div className="absolute inset-0" onClick={() => setSpotCheckProject(null)} />
+          <div className="relative w-full max-w-6xl h-[90vh] overflow-hidden rounded-[40px] shadow-2xl bg-slate-50 ring-1 ring-slate-200">
+            <button onClick={() => setSpotCheckProject(null)} className="absolute top-4 right-4 z-20 w-11 h-11 rounded-full bg-white shadow-lg flex items-center justify-center text-xl text-slate-900 hover:bg-slate-100 transition-all">
+              ×
+            </button>
+            <div className="relative h-full overflow-hidden">
                <AISpotCheck project={spotCheckProject} onVerdict={(v) => {
                  if(v === 'VERIFIED') onVerifyProject?.('st_123', spotCheckProject.id, 'VERIFIED');
                  setSpotCheckProject(null);

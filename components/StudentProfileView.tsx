@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { StudentProfile, Skill } from '../types';
 
 interface StudentProfileViewProps {
@@ -10,25 +10,31 @@ interface StudentProfileViewProps {
 const StudentProfileView: React.FC<StudentProfileViewProps> = ({ student, onUpdate }) => {
   const [newSkill, setNewSkill] = useState('');
   const [isEditing, setIsEditing] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [profileData, setProfileData] = useState({
     name: student.name,
     summary: student.summary || '',
     email: student.email || '',
-    phone: student.phone || ''
+    phone: student.phone || '',
+    resumeUrl: student.resumeUrl || '',
+    githubUrl: student.githubUrl || '',
+    linkedInUrl: student.linkedInUrl || '',
+    portfolioUrl: student.portfolioUrl || '',
+    isPrivate: student.isPrivate || false,
   });
 
   const handleAddSkill = () => {
     if (!newSkill) return;
-    const exists = student.skills.find(s => s.name.toLowerCase() === newSkill.toLowerCase());
+    const exists = (student.skills || []).find(s => s.name.toLowerCase() === newSkill.toLowerCase());
     if (exists) return;
 
-    const updatedSkills: Skill[] = [...student.skills, { name: newSkill, isVerified: false }];
+    const updatedSkills: Skill[] = [...(student.skills || []), { name: newSkill, isVerified: false }];
     onUpdate({ skills: updatedSkills });
     setNewSkill('');
   };
 
   const removeSkill = (name: string) => {
-    const updatedSkills = student.skills.filter(s => s.name !== name);
+    const updatedSkills = (student.skills || []).filter(s => s.name !== name);
     onUpdate({ skills: updatedSkills });
   };
 
@@ -37,8 +43,20 @@ const StudentProfileView: React.FC<StudentProfileViewProps> = ({ student, onUpda
     setIsEditing(false);
   };
 
-  const verifiedCount = student.skills.filter(s => s.isVerified).length;
-  const verificationRatio = Math.round((verifiedCount / student.skills.length) * 100) || 0;
+  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !file.type.startsWith('image/')) return;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result as string;
+      onUpdate({ profileImage: result });
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const verifiedCount = (student.skills || []).filter(s => s.isVerified).length;
+  const verificationRatio = Math.round((verifiedCount / ((student.skills || []).length || 1)) * 100) || 0;
 
   return (
     <div className="space-y-8 animate-fade-in pb-20">
@@ -46,14 +64,41 @@ const StudentProfileView: React.FC<StudentProfileViewProps> = ({ student, onUpda
         <div className="flex flex-col lg:flex-row justify-between items-start gap-8 mb-10">
           <div className="flex flex-col sm:flex-row gap-6 items-start">
             <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-[32px] border-4 border-indigo-50 bg-indigo-50 overflow-hidden shadow-2xl">
-              <img src={`https://picsum.photos/seed/${student.id}/200`} alt="Avatar" className="w-full h-full object-cover" />
+              {isEditing ? (
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="w-full h-full"
+                >
+                  <img
+                    src={student.profileImage || `https://picsum.photos/seed/${student.uid}/200`}
+                    alt="Avatar"
+                    className="w-full h-full object-cover"
+                  />
+                </button>
+              ) : (
+                <img
+                  src={student.profileImage || `https://picsum.photos/seed/${student.uid}/200`}
+                  alt="Avatar"
+                  className="w-full h-full object-cover"
+                />
+              )}
+              {isEditing && (
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handlePhotoUpload}
+                />
+              )}
             </div>
             <div>
               <h2 className="text-4xl font-black text-slate-900 mb-2">{student.name}</h2>
               <p className="text-slate-500 font-bold text-lg">{student.university} • {student.department}</p>
               <div className="flex flex-col sm:flex-row gap-4 mt-4">
                 <span className="px-4 py-1.5 bg-indigo-600 text-white rounded-xl text-xs font-black uppercase tracking-widest shadow-lg shadow-indigo-100">
-                  Readiness: {student.readinessScore}%
+                  Readiness: {student.aiReadinessScore}%
                 </span>
                 <span className={`px-4 py-1.5 rounded-xl text-xs font-black uppercase tracking-widest border-2 ${
                   verificationRatio > 70 ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-amber-50 text-amber-600 border-amber-100'
@@ -108,6 +153,62 @@ const StudentProfileView: React.FC<StudentProfileViewProps> = ({ student, onUpda
                 )}
               </div>
             </section>
+            <section className="space-y-1">
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Resume Link</label>
+              {isEditing ? (
+                <input type="url" value={profileData.resumeUrl} onChange={e => setProfileData({...profileData, resumeUrl: e.target.value})} className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold" placeholder="https://" />
+              ) : (
+                <p className="font-black text-slate-800">{student.resumeUrl || 'Not added yet'}</p>
+              )}
+            </section>
+
+            {/* Social Links — synced with mobile schema */}
+            <section>
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 block">Social & Portfolio Links</label>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-slate-400 flex items-center gap-1"><i className="fab fa-github"></i> GitHub</label>
+                  {isEditing ? (
+                    <input type="url" value={profileData.githubUrl} onChange={e => setProfileData({...profileData, githubUrl: e.target.value})} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold" placeholder="https://github.com/..." />
+                  ) : (
+                    <p className="font-bold text-sm text-slate-800 truncate">{student.githubUrl || <span className="text-slate-400 italic">Not set</span>}</p>
+                  )}
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-slate-400 flex items-center gap-1"><i className="fab fa-linkedin"></i> LinkedIn</label>
+                  {isEditing ? (
+                    <input type="url" value={profileData.linkedInUrl} onChange={e => setProfileData({...profileData, linkedInUrl: e.target.value})} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold" placeholder="https://linkedin.com/in/..." />
+                  ) : (
+                    <p className="font-bold text-sm text-slate-800 truncate">{student.linkedInUrl || <span className="text-slate-400 italic">Not set</span>}</p>
+                  )}
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-slate-400 flex items-center gap-1"><i className="fas fa-globe"></i> Portfolio</label>
+                  {isEditing ? (
+                    <input type="url" value={profileData.portfolioUrl} onChange={e => setProfileData({...profileData, portfolioUrl: e.target.value})} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold" placeholder="https://yoursite.com" />
+                  ) : (
+                    <p className="font-bold text-sm text-slate-800 truncate">{student.portfolioUrl || <span className="text-slate-400 italic">Not set</span>}</p>
+                  )}
+                </div>
+              </div>
+            </section>
+
+            {/* Privacy Toggle */}
+            {isEditing && (
+              <section className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-200">
+                <div>
+                  <p className="font-bold text-sm text-neutral-text">Private Profile</p>
+                  <p className="text-xs text-slate-400">Hide your profile from public search</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setProfileData({...profileData, isPrivate: !profileData.isPrivate})}
+                  className={`w-12 h-7 rounded-full transition-colors relative ${profileData.isPrivate ? 'bg-primary' : 'bg-slate-300'}`}
+                >
+                  <span className={`absolute top-0.5 w-6 h-6 bg-white rounded-full shadow transition-transform ${profileData.isPrivate ? 'translate-x-5' : 'translate-x-0.5'}`}></span>
+                </button>
+              </section>
+            )}
           </div>
 
           <div className="space-y-8">
@@ -121,7 +222,7 @@ const StudentProfileView: React.FC<StudentProfileViewProps> = ({ student, onUpda
               </div>
               
               <div className="flex flex-wrap gap-3 mb-6">
-                {student.skills.map((skill) => (
+                {(student.skills || []).map((skill) => (
                   <div 
                     key={skill.name} 
                     className={`px-4 py-2 rounded-xl flex items-center gap-3 border-2 transition-all ${

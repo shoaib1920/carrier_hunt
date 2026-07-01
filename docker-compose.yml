@@ -1,0 +1,24 @@
+# Local PostgreSQL for Career Hunt API (backend/)
+# Usage: docker compose up -d
+# DATABASE_URL=postgresql://careerhunt:careerhunt@localhost:5432/careerhunt
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: career-hunt-postgres
+    environment:
+      POSTGRES_USER: careerhunt
+      POSTGRES_PASSWORD: careerhunt
+      POSTGRES_DB: careerhunt
+    ports:
+      - "5432:5432"
+    volumes:
+      - career_hunt_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U careerhunt -d careerhunt"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  career_hunt_pgdata:
